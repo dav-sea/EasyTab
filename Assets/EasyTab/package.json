@@ -1,0 +1,25 @@
+{
+  "name": "easy-tab",
+  "version": "1.0.0",
+  "displayName": "Easy Tab",
+  "description": "A simple package that allows you to easily implement <kbd>Tab</kbd> key navigation functionality between Selectables. This package is very easy to install and also easy to customize if needed",
+  "unity": "2017.4",
+  "keywords": [
+    "tools",
+    "code",
+    "utility",
+    "extensions",
+    "navigation",
+    "tab",
+    "tab-key"
+  ],
+  "author": "https://github.com/dav-sea",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dav-sea/EasyTab.git"
+  },
+  "bugs": { 
+    "url": "https://github.com/dav-sea/EasyTab/issues"
+  },
+  "homepage": "https://github.com/dav-sea/EasyTab"
+}
