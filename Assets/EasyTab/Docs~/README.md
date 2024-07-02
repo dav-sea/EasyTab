@@ -6,13 +6,15 @@
 
 A simple package that allows you to easily implement <kbd>Tab</kbd> key navigation functionality between Selectables. This package is very easy to install and also easy to customize if needed
 
-![GitHub package.json version](https://img.shields.io/github/package-json/v/dav-sea/EasyTab?filename=Assets%2FEasyTab%2Fpackage.json&label=%20)
-![Badge](https://img.shields.io/badge/2019+-black?logo=unity)
-![Badge](https://img.shields.io/badge/Just%20install%20to%20use%20-%20orange)
+
+![Badge](https://img.shields.io/badge/Unity%202019+-black?logo=unity)
+[![Badge](https://img.shields.io/badge/Just%20install%20to%20use%20-%20orange)](#installation-methods)
+[![Badge](https://img.shields.io/badge/Asset%20Store-black?logo=unity)](https://assetstore.unity.com/packages/tools/gui/easytab-286071)
+[![openupm](https://img.shields.io/npm/v/com.dav-sea.easy-tab?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.dav-sea.easy-tab/)
 ![Badge](https://img.shields.io/badge/TMP-supported-green)   
 ![Badge](https://img.shields.io/badge/InputSystem%20V1%20(Old)-supported-green)
 ![Badge](https://img.shields.io/badge/InputSystem%20V2%20(New)-supported-green)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/dav-sea/EasyTab/total?label=downloads&logo=github)
+[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/dav-sea/EasyTab/total?label=downloads&logo=github)](https://github.com/dav-sea/EasyTab/releases/latest)
 
 ---
 
@@ -67,6 +69,13 @@ You can install [package](https://openupm.com/packages/com.dav-sea.easy-tab/) vi
 ```shell
 openupm add com.dav-sea.easy-tab
 ```
+
+</details>
+
+<details>
+<summary> <b>Method 4.</b> AssetStore</summary>
+
+Download asset from [AssetStore page](https://assetstore.unity.com/packages/tools/gui/easytab-286071)
 
 </details>
 
