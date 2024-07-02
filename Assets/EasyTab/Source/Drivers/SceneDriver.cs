@@ -1,10 +1,16 @@
-﻿using UnityEngine.SceneManagement;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace EasyTab
 {
     public sealed class SceneDriver : IEasyTabNodeDriver<Scene>
     {
         private readonly EasyTabNodeDriver _drivers;
+        
+        // list for temporary storage of the root objects of the scene. it is needed to avoid frequent allocations
+        // The initial capacity is 0, so GetRootGameObjects will set the best capacity before filling
+        private readonly List<GameObject> _listOfGameObjects = new List<GameObject>(0);
 
         public SceneDriver(EasyTabNodeDriver drivers)
         {
@@ -18,9 +24,13 @@ namespace EasyTab
 
         public EasyTabNode GetChild(Scene target, int childNumber)
         {
-            // todo: remove alloc
-            var roots = target.GetRootGameObjects(); 
-            var child = roots[childNumber];
+            // Method overloading with List<> is used to avoid allocations
+            target.GetRootGameObjects(_listOfGameObjects); 
+
+            var child = _listOfGameObjects[childNumber];
+            
+            // It is necessary to clean the list so as not to store links and not to disrupt the GC
+            _listOfGameObjects.Clear();
 
             if (child.TryGetComponent<EasyTab>(out var childEasyTab))
                 return EasyTabNode.ByDriver(childEasyTab, _drivers.EasyTabDriver);
