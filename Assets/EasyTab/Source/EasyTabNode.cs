@@ -3,6 +3,10 @@ using JetBrains.Annotations;
 
 namespace EasyTab
 {
+    /// <summary>
+    /// This structure is an element of the hierarchy of objects in Unity.
+    /// Provides a uniform API for working with hierarchy, encapsulating a driver that can work with either Transform, Scene, EasyTab (component) or root
+    /// </summary>
     public struct EasyTabNode
     {
         [CanBeNull] private readonly object _target;

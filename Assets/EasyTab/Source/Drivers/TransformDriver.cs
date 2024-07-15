@@ -1,15 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using JetBrains.Annotations;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace EasyTab
 {
     public class TransformDriver : IEasyTabNodeDriver<Transform>
     {
-        private readonly EasyTabNodeDriver _drivers;
+        [NotNull] private readonly EasyTabNodeDriver _drivers;
 
-        public TransformDriver(EasyTabNodeDriver drivers)
+        public TransformDriver([NotNull] EasyTabNodeDriver drivers)
         {
-            _drivers = drivers;
+            _drivers = drivers ?? throw new ArgumentNullException(nameof(drivers));
         }
 
         public virtual EasyTabNode GetParent(Transform target)
@@ -22,7 +24,7 @@ namespace EasyTab
 
                 return new EasyTabNode(parent, _drivers.TransformDriver);
             }
-            
+
             return new EasyTabNode(target.gameObject.scene, _drivers.SceneDriver);
         }
 
@@ -35,31 +37,19 @@ namespace EasyTab
             return EasyTabNode.ByDriver(child, _drivers.TransformDriver);
         }
 
-        public virtual int GetChildrenCount(Transform target)
-        {
-            // mb rework to activeSelf?...
-            if (!target.gameObject.activeInHierarchy)
-                return 0;
+        public virtual int GetChildrenCount(Transform target) 
+            => _drivers.Conditions.CanTraversingChildren(target) 
+                ? target.childCount 
+                : 0;
 
-            if (target.TryGetComponent(out CanvasGroup cg) && (!cg.interactable || cg.alpha == 0))
-                return 0;
-            
-            return target.childCount;
-        }
-
-        public virtual bool IsSelectable(Transform target)
-        {
-            return target.gameObject.activeInHierarchy
-                   && target.TryGetComponent(out Selectable selectable)
-                   && selectable.enabled
-                   && selectable.interactable;
-        }
+        public virtual bool IsSelectable(Transform target) 
+            => _drivers.Conditions.CanSelect(target);
 
         public virtual BorderMode GetBorderMode(Transform target)
         {
             return GetParent(target).IsNone ? BorderMode.Roll : BorderMode.Escape;
         }
-        
+
         BorderMode IEasyTabNodeDriver.GetBorderMode(object target)
         {
             return GetBorderMode((Transform)target);

@@ -46,10 +46,10 @@ namespace EasyTab
                 if (!fallback)
                     return false;
 
-                if (!Drivers.ParentsIsCorrect(fallback.transform))
+                if (!ParentsIsCorrect(fallback.transform))
                     return false;
 
-                var fallbackNode = Drivers.FindStartNodeRelativeBy(fallback.transform);
+                var fallbackNode = FindStartNodeRelativeBy(fallback.transform);
                 if (!fallbackNode.IsSelectable)
                     return false;
 
@@ -79,7 +79,7 @@ namespace EasyTab
             if (needLock)
                 return null;
 
-            var currentNode = Drivers.FindStartNodeRelativeBy(current.transform);
+            var currentNode = FindStartNodeRelativeBy(current.transform);
 
             if (currentNode.IsNone)
             {
@@ -149,6 +149,44 @@ namespace EasyTab
             }
 
             return null;
+        }
+        
+        private bool ParentsIsCorrect(Transform target) 
+            => TryGetValidParent(target, out var result) && target.parent == result;
+
+        private EasyTabNode FindStartNodeRelativeBy(Transform target)
+        {
+            if (!TryGetValidParent(target, out var result)) 
+                target = result;
+
+            return Drivers.CreateNode(target);
+        }
+        
+        private bool TryGetValidParent(Transform current, out Transform bestParent)
+        {
+            bestParent = null;
+            
+            var parent = current.parent;
+            if (!parent)
+                // if parent is null then is 'current' is one of root transform
+                return true;
+            
+            // This is a recursion that goes up to the roots
+            if (TryGetValidParent(parent, out var upperBestParent))
+            {
+                var parentNode = Drivers.CreateNode(parent);
+                if (parentNode.ChildrenCount == 0)
+                {
+                    bestParent = parent;
+                    return false;
+                }
+
+                bestParent = parent;
+                return true;
+            }
+
+            bestParent = upperBestParent;
+            return false;
         }
 
         private void ExtractOptions(GameObject target, out bool needLock, out bool needHandleEnter)
