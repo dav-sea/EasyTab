@@ -5,8 +5,8 @@ namespace EasyTab
     public enum SelectableRecognition
     {
         [InspectorName("Auto (by Driver)")]
-        ByDriver,
+        ByDriver = 0,
         [InspectorName("As not selectable")]
-        AsNotSelectable,
+        AsNotSelectable = 1,
     }
 }

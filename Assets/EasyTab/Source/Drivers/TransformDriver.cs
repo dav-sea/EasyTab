@@ -1,7 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace EasyTab
 {
@@ -19,9 +18,6 @@ namespace EasyTab
             var parent = target.parent;
             if (parent)
             {
-                if (parent.TryGetComponent<EasyTab>(out var easyTab))
-                    return new EasyTabNode(easyTab, _drivers.EasyTabDriver);
-
                 return new EasyTabNode(parent, _drivers.TransformDriver);
             }
 
@@ -31,22 +27,34 @@ namespace EasyTab
         public virtual EasyTabNode GetChild(Transform target, int childNumber)
         {
             var child = target.GetChild(childNumber);
-            if (child.TryGetComponent<EasyTab>(out var easyTabChild))
-                return EasyTabNode.ByDriver(easyTabChild, _drivers.EasyTabDriver);
-
             return EasyTabNode.ByDriver(child, _drivers.TransformDriver);
         }
 
-        public virtual int GetChildrenCount(Transform target) 
-            => _drivers.Conditions.CanTraversingChildren(target) 
-                ? target.childCount 
+        public virtual int GetChildrenCount(Transform target)
+        {
+            if (target.TryGetComponent<EasyTab>(out var easyTabComponent)
+                && easyTabComponent.ChildrenExtracting == ChildrenExtracting.WithoutChildren)
+                return 0;
+            
+            return _drivers.Conditions.CanTraversingChildren(target)
+                ? target.childCount
                 : 0;
+        }
 
-        public virtual bool IsSelectable(Transform target) 
-            => _drivers.Conditions.CanSelect(target);
+        public virtual bool IsSelectable(Transform target)
+        {
+            if (target.TryGetComponent<EasyTab>(out var easyTabComponent)
+                && easyTabComponent.SelectableRecognition == SelectableRecognition.AsNotSelectable)
+                return false;
+            
+            return _drivers.Conditions.CanSelect(target);
+        }
 
         public virtual BorderMode GetBorderMode(Transform target)
         {
+            if (target.TryGetComponent<EasyTab>(out var easyTabComponent))
+                return easyTabComponent.BorderMode;
+            
             return GetParent(target).IsNone ? BorderMode.Roll : BorderMode.Escape;
         }
 

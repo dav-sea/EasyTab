@@ -32,9 +32,6 @@ namespace EasyTab
             // It is necessary to clean the list so as not to store links and not to disrupt the GC
             _listOfGameObjects.Clear();
 
-            if (child.TryGetComponent<EasyTab>(out var childEasyTab))
-                return EasyTabNode.ByDriver(childEasyTab, _drivers.EasyTabDriver);
-            
             return EasyTabNode.ByDriver(child.transform, _drivers.TransformDriver);
         }
 

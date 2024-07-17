@@ -1,13 +1,16 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace EasyTab
 {
+    [PublicAPI]
     public sealed class EasyTabConditions
     {
+        [PublicAPI]
         public readonly List<IEasyTabCondition<Transform>> ConditionsForTraversingChildren;
-        public readonly List<IEasyTabCondition<Scene>> ConditionsForTraversingScene;
+        
+        [PublicAPI]
         public readonly List<IEasyTabCondition<Transform>> ConditionsForSelectable;
 
         public EasyTabConditions()
@@ -29,18 +32,10 @@ namespace EasyTab
                 isActiveGameObjectCondition,
                 selectableCondition
             };
-            
-            ConditionsForTraversingScene = new List<IEasyTabCondition<Scene>>()
-            {
-
-            };
         }
 
         public bool CanTraversingChildren(Transform transform)
             => ConditionsIsMet(ConditionsForTraversingChildren, transform);
-        
-        public bool CanTraversingScene(Scene transform)
-            => ConditionsIsMet(ConditionsForTraversingScene, transform);
 
         public bool CanSelect(Transform transform)
             => ConditionsIsMet(ConditionsForSelectable, transform);

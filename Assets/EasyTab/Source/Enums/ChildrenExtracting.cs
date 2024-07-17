@@ -5,9 +5,9 @@ namespace EasyTab
     public enum ChildrenExtracting 
     {
         [InspectorName("By transform children")]
-        ByTransformChildren,
+        ByTransformChildren = 0,
         
         [InspectorName("Without children")]
-        WithoutChildren,
+        WithoutChildren = 1,
     }
 }
