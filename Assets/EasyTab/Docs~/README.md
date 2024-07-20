@@ -23,21 +23,22 @@ A simple package that allows you to easily implement <kbd>Tab</kbd> key navigati
   - [Installation methods](#installation-methods)
 - [Features](#features)
 - [Configuration](#configuration)
-- [Customization](#customization)
+- [Integration with your tools](#integration-with-your-tools)
 
 # How to start
 By default, the package is automatically embedded in PlayerLoop Unity. It is enough to install the package in any convenient way and <kbd>Tab</kbd> key navigation should work
 
 ## Installation methods
 <details>
-<summary> <b>Method 1.</b> Downlaod and import unitypackage </summary>
+<summary> <b style="font-size: large">Method 1.</b> Downlaod and import unitypackage </summary>
 
-- Just download `EasyTab.unitypackage` on the [release page](https://github.com/dav-sea/EasyTab/releases) and import it into your project
+| 👉 | Just download `EasyTab.unitypackage` on the [release page](https://github.com/dav-sea/EasyTab/releases) and import it into your project |
+|----|-----------------------------------------------------------------------------------------------------------------------------------------|
 
 </details>
 
 <details>
-<summary> <b>Method 2.</b> Via Git URL</summary>
+<summary> <b style="font-size: large">Method 2.</b> Via Git URL</summary>
 
 > [!WARNING]
 >
@@ -62,7 +63,7 @@ By default, the package is automatically embedded in PlayerLoop Unity. It is eno
 </details>
 
 <details>
-<summary> <b>Method 3.</b> OpenUPM</summary>
+<summary> <b style="font-size: large">Method 3.</b> OpenUPM</summary>
 
 You can install [package](https://openupm.com/packages/com.dav-sea.easy-tab/) via OpenUPM client:
 
@@ -73,9 +74,10 @@ openupm add com.dav-sea.easy-tab
 </details>
 
 <details>
-<summary> <b>Method 4.</b> AssetStore</summary>
+<summary> <b style="font-size: large">Method 4.</b> AssetStore</summary>
 
-Download asset from [AssetStore page](https://assetstore.unity.com/packages/tools/gui/easytab-286071)
+| 👉 | Download asset from [AssetStore page](https://assetstore.unity.com/packages/tools/gui/easytab-286071) |
+|----|-------------------------------------------------------------------------------------------------------|
 
 </details>
 
@@ -148,7 +150,7 @@ It is great in cases where you need to define behavior in a local area of your p
 
 ---
 #### SelectableRecognition
-You can ignore Selectable on the same GameObject.
+You can ignore `Selectable` on the same `GameObject`.
 
 #### BorderMode
 You can determine what the solver should do in cases when the extreme children (first or last) are reached when traversing the `Transform` tree
@@ -221,33 +223,30 @@ You can set `NavigationPolicy` in different cases: `WhenCurrentIsNotSet`, `WhenC
 
 `AllowNavigateToLastSelected`: Allow navigation to the last selected object (especially useful when focus is lost when clicking into the void) as a fallback option
 
-#### Drivers
-A set of drivers for different objects (`Transform`, `Scene`, `EasyTab` component). See about drivers in the customization section
+# Integration with your tools
+The idea of EasyTab is that it works out of the box and does not require any configuration. However, if you use third-party tools, for example, to hide UI elements and windows, you need to define a small bridge between this intranet and EasyTab for correct works
 
-# Customization
-With customization, you can easily and effectively integrate other tools into the logic of this package.
+A common practice when developing UI in Unity is to hide elements by changing transparency, moving outside the screen space, reducing scale, etc.
 
-The most direct way to customization is to define your own IEasyTabDriver. But you can take an existing TransfomDriver as a basis and redefine only those aspects that you need.
-
-For example, if you do NOT use CanvasGroup to hide a window and do not turn off GameObject, then EasyTab will not be able to understand by itself that you do not need to navigate through the elements of this window. To do this, you need to define a similar driver:
-```c#
- class OverrideTransformDriver : TransformDriver {
-    public override int GetChildrenCount(Transform target) {
-        // your custom logic
-        if (target.TryGetComponent(out MyWindowImplmentation window) && !window.IsVisible)
-            return 0;
-        
-        // or default
-        return base.GetChildrenCount(target);
-    }
-}
-```
-
-And in order for your driver to start working, call the setTransform Driver method.
+As a rule, there is always some bool property that determines whether the object is visible or not.
+In this case, you need to add a simple condition so that EasyTab can take this into account
 
 For example, like this:
+
 ```c#
-var globallyDrivers = EasyTabIntegration.Globally.Solver.Drivers;
-var customDriver = new OverrideTransformDriver(globallyDrivers); // you need pass other drivers into ctor
-globallyDrivers.SetTransformDriver(customDriver);
+var globalDrivers = EasyTabIntegration.Globally.Solver.Drivers;
+var conditions = globalDrivers.Conditions.ConditionsForTraversingChildren;
+
+// It is necessary to define a condition in case of non-met of which the children of this transform will not be traversed.
+conditions.Add(t => !t.TryGetComponent<Window>(out var window) || window.IsActive);
+```
+
+It can also be useful to exclude specific elements, for this you should use `ConditionsForSelectable` instead of `ConditionsForTraversingChildren`
+
+```c#
+var globalDrivers = EasyTabIntegration.Globally.Solver.Drivers;
+var conditions = globalDrivers.Conditions.ConditionsForSelectable;
+
+// We exclude transparent elements
+conditions.Add(t => !t.TryGetComponent<Graphic>(out var graphic) || graphic.color.a > 0);
 ```
