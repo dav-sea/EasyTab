@@ -85,7 +85,7 @@ openupm add com.dav-sea.easy-tab
 
 Everything is ready! If the installation of the package was successful, then now you can go to Play Mode and check how the <kbd>Tab</kbd> key navigation works in your project
 
-![gif](https://media.githubusercontent.com/media/dav-sea/EasyTab/master/Media/demo.gif)
+![gif](../../Media/gifs/demo.gif)
 
 # Features
 ### Just use
@@ -139,6 +139,14 @@ Everything is ready! If the installation of the package was successful, then now
 🕹️ The ability to independently control navigation through the code
 
 ✨ The ability to define additional conditions for the availability of objects (by defining your own `TransformDriver`)
+
+
+## Showcases
+| <center><h3>➡️ Tab<br>Naviagtion</h3></center><br/> ![gif](../../../Media/gifs/tab-tab-enter.gif)                       | <center><h3>🔙 Shift-Tab <br>Naviagtion (reverse)</h3></center><br/> ![gif](../../../Media/gifs/shift-tab.gif)          | <center><h3>⏮️ Last selected<br>Restore</h3></center><br/> ![gif](../../../Media/gifs/last-selected.gif) |
+|-------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| <center><h3>↩️ Enter (on InputField)<br>Naviagtion</h3></center><br/> ![gif](../../../Media/gifs/enter-enter-enter.gif) | <center><h3>💡 Checking of objects<br>for accessibility</h3></center><br/> ![gif](../../../Media/gifs/interactable.gif) | <center><h3>🔤 Multiline <br> InputField</h3></center><br/> ![gif](../../../Media/gifs/input-fields.gif) |
+
+
 
 # Configuration
 The package provides several configuration levels: `EasyTab` (component), `EasyTabIntegration`, `EasyTabSolver`
