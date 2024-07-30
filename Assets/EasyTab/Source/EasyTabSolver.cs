@@ -215,7 +215,7 @@ namespace EasyTab
                     : easyTab.NavigationLock == NavigationLock.Lock;
 
                 needHandleEnter = easyTab.EnterHandling == EnterHandling.Auto
-                    ? needLock
+                    ? needHandleEnter
                     : easyTab.EnterHandling == EnterHandling.NavigateNext;
             }
         }

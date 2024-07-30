@@ -43,7 +43,12 @@ namespace EasyTab
             }
 
             if (parent.BorderMode == BorderMode.Clamp)
-                return current;
+            {
+                if(current.IsSelectable)
+                    return current;
+                
+                return EasyTabNode.None;
+            }
 
             if (parent.BorderMode == BorderMode.Escape)
             {

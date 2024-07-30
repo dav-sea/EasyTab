@@ -82,7 +82,9 @@ namespace EasyTab.Tests
                 yield return new TestCaseData("Case1", false).Returns(null);
                 yield return new TestCaseData("Case1", true).Returns(null);
                 yield return new TestCaseData("ClampTestCase1", false).Returns(null);
+                yield return new TestCaseData("ClampTestCase2", false).Returns(null);
                 yield return new TestCaseData("ClampTestCase1", true).Returns(null);
+                yield return new TestCaseData("ClampTestCase2", true).Returns(null);
                 yield return new TestCaseData("ExcludeChildrenCase1", true).Returns(null);
                 yield return new TestCaseData("ExcludeChildrenCase1", false).Returns(null);
                 yield return new TestCaseData("ExcludeChildrenCase2", false).Returns(null);
