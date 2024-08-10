@@ -1,6 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace EasyTab
 {
@@ -35,7 +36,7 @@ namespace EasyTab
             if (target.TryGetComponent<EasyTab>(out var easyTabComponent)
                 && easyTabComponent.ChildrenExtracting == ChildrenExtracting.WithoutChildren)
                 return 0;
-            
+
             return _drivers.Conditions.CanTraversingChildren(target)
                 ? target.childCount
                 : 0;
@@ -46,7 +47,7 @@ namespace EasyTab
             if (target.TryGetComponent<EasyTab>(out var easyTabComponent)
                 && easyTabComponent.SelectableRecognition == SelectableRecognition.AsNotSelectable)
                 return false;
-            
+
             return _drivers.Conditions.CanSelect(target);
         }
 
@@ -54,7 +55,15 @@ namespace EasyTab
         {
             if (target.TryGetComponent<EasyTab>(out var easyTabComponent))
                 return easyTabComponent.BorderMode;
+
+#if TMP_PRESENT
+            if (target.TryGetComponent<TMPro.TMP_Dropdown>(out _))
+                return BorderMode.Roll;
+#endif
             
+            if (target.TryGetComponent<Dropdown>(out _))
+                return BorderMode.Roll;
+
             return GetParent(target).IsNone ? BorderMode.Roll : BorderMode.Escape;
         }
 

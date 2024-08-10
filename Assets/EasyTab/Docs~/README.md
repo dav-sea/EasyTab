@@ -104,6 +104,8 @@ Everything is ready! If the installation of the package was successful, then now
 
 🔤 Additional support for input fields, including `TextMeshPro` (multiline case and <kbd>Tab</kbd> non-processing when typing)
 
+☰ Dropdown support. Items inside `Dropdown` are automatically navigated cyclically (Roll)
+
 ⏮️ Navigate to the last selected object when the focus is not set
 
 💡 Automatic checking of objects for accessibility (alive, active, intractable, canvas-group)
