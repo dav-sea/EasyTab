@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace EasyTab
 {
-    public class TransformDriver : IEasyTabNodeDriver<Transform>
+    public class TransformDriver : IEasyTabNodeDriver
     {
         [NotNull] private readonly EasyTabNodeDriver _drivers;
 
@@ -14,82 +14,61 @@ namespace EasyTab
             _drivers = drivers ?? throw new ArgumentNullException(nameof(drivers));
         }
 
-        public virtual EasyTabNode GetParent(Transform target)
+        public virtual EasyTabNode GetParent(TransformOrScene target)
         {
-            var parent = target.parent;
+            var transform = target.AsTransform;
+            var parent = transform.parent;
             if (parent)
             {
                 return new EasyTabNode(parent, _drivers.TransformDriver);
             }
 
-            return new EasyTabNode(target.gameObject.scene, _drivers.SceneDriver);
+            return new EasyTabNode(transform.gameObject.scene, _drivers.SceneDriver);
         }
 
-        public virtual EasyTabNode GetChild(Transform target, int childNumber)
+        public virtual EasyTabNode GetChild(TransformOrScene target, int childNumber)
         {
-            var child = target.GetChild(childNumber);
-            return EasyTabNode.ByDriver(child, _drivers.TransformDriver);
+            var child = target.AsTransform.GetChild(childNumber);
+            return new EasyTabNode(child, _drivers.TransformDriver);
         }
 
-        public virtual int GetChildrenCount(Transform target)
+        public virtual int GetChildrenCount(TransformOrScene target)
         {
-            if (target.TryGetComponent<EasyTab>(out var easyTabComponent)
+            var transform = target.AsTransform;
+            if (transform.TryGetComponent<EasyTab>(out var easyTabComponent)
                 && easyTabComponent.ChildrenExtracting == ChildrenExtracting.WithoutChildren)
                 return 0;
 
-            return _drivers.Conditions.CanTraversingChildren(target)
-                ? target.childCount
+            return _drivers.Conditions.CanTraversingChildren(transform)
+                ? transform.childCount
                 : 0;
         }
 
-        public virtual bool IsSelectable(Transform target)
+        public virtual bool IsSelectable(TransformOrScene target)
         {
-            if (target.TryGetComponent<EasyTab>(out var easyTabComponent)
+            var transform = target.AsTransform;
+            if (transform.TryGetComponent<EasyTab>(out var easyTabComponent)
                 && easyTabComponent.SelectableRecognition == SelectableRecognition.AsNotSelectable)
                 return false;
 
-            return _drivers.Conditions.CanSelect(target);
+            return _drivers.Conditions.CanSelect(transform);
         }
 
-        public virtual BorderMode GetBorderMode(Transform target)
+        public virtual BorderMode GetBorderMode(TransformOrScene target)
         {
-            if (target.TryGetComponent<EasyTab>(out var easyTabComponent))
+            var transform = target.AsTransform;
+            if (transform.TryGetComponent<EasyTab>(out var easyTabComponent))
                 return easyTabComponent.BorderMode;
 
 #if TMP_PRESENT
-            if (target.TryGetComponent<TMPro.TMP_Dropdown>(out _))
+            if (transform.TryGetComponent<TMPro.TMP_Dropdown>(out _))
                 return BorderMode.Roll;
 #endif
             
-            if (target.TryGetComponent<Dropdown>(out _))
+            if (transform.TryGetComponent<Dropdown>(out _))
                 return BorderMode.Roll;
 
             return GetParent(target).IsNone ? BorderMode.Roll : BorderMode.Escape;
-        }
-
-        BorderMode IEasyTabNodeDriver.GetBorderMode(object target)
-        {
-            return GetBorderMode((Transform)target);
-        }
-
-        EasyTabNode IEasyTabNodeDriver.GetChild(object target, int childNumber)
-        {
-            return GetChild((Transform)target, childNumber);
-        }
-
-        int IEasyTabNodeDriver.GetChildrenCount(object target)
-        {
-            return GetChildrenCount((Transform)target);
-        }
-
-        bool IEasyTabNodeDriver.IsSelectable(object target)
-        {
-            return IsSelectable((Transform)target);
-        }
-
-        EasyTabNode IEasyTabNodeDriver.GetParent(object target)
-        {
-            return GetParent((Transform)target);
         }
     }
 }

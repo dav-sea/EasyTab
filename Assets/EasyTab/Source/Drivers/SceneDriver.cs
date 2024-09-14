@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace EasyTab
 {
-    public sealed class SceneDriver : IEasyTabNodeDriver<Scene>
+    public sealed class SceneDriver : IEasyTabNodeDriver
     {
         private readonly EasyTabNodeDriver _drivers;
         
@@ -17,62 +16,37 @@ namespace EasyTab
             _drivers = drivers;
         }
 
-        public BorderMode GetBorderMode(Scene target)
+        public BorderMode GetBorderMode(TransformOrScene _)
         {
             return BorderMode.Escape;
         }
 
-        public EasyTabNode GetChild(Scene target, int childNumber)
+        public EasyTabNode GetChild(TransformOrScene target, int childNumber)
         {
             // Method overloading with List<> is used to avoid allocations
-            target.GetRootGameObjects(_listOfGameObjects); 
+            target.AsScene.GetRootGameObjects(_listOfGameObjects); 
 
             var child = _listOfGameObjects[childNumber];
             
             // It is necessary to clean the list so as not to store links and not to disrupt the GC
             _listOfGameObjects.Clear();
 
-            return EasyTabNode.ByDriver(child.transform, _drivers.TransformDriver);
+            return new EasyTabNode(child.transform, _drivers.TransformDriver);
         }
 
-        public int GetChildrenCount(Scene target)
+        public int GetChildrenCount(TransformOrScene target)
         {
-            return target.rootCount;
+            return target.AsScene.rootCount;
         }
 
-        public bool IsSelectable(Scene target)
+        public bool IsSelectable(TransformOrScene target)
         {
             return false;
         }
 
-        public EasyTabNode GetParent(Scene target)
+        public EasyTabNode GetParent(TransformOrScene target)
         {
-            return new EasyTabNode(null, _drivers.RootDriver);
-        }
-        
-        BorderMode IEasyTabNodeDriver.GetBorderMode(object target)
-        {
-            return GetBorderMode((Scene)target);
-        }
-
-        EasyTabNode IEasyTabNodeDriver.GetChild(object target, int childNumber)
-        {
-            return GetChild((Scene)target, childNumber);
-        }
-
-        int IEasyTabNodeDriver.GetChildrenCount(object target)
-        {
-            return GetChildrenCount((Scene)target);
-        }
-
-        bool IEasyTabNodeDriver.IsSelectable(object target)
-        {
-            return IsSelectable((Scene)target);
-        }
-
-        EasyTabNode IEasyTabNodeDriver.GetParent(object target)
-        {
-            return GetParent((Scene)target);
+            return new EasyTabNode(default, _drivers.RootDriver);
         }
     }
 }

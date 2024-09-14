@@ -11,18 +11,9 @@ namespace EasyTab
         [PublicAPI]
         public EasyTabConditions Conditions { private set; get; }
         [PublicAPI]
-        public IEasyTabNodeDriver<Transform> TransformDriver { private set; get; }
-        internal IEasyTabNodeDriver<Scene> SceneDriver {private set;  get; }
+        public IEasyTabNodeDriver TransformDriver { private set; get; }
+        internal IEasyTabNodeDriver SceneDriver {private set;  get; }
         internal IEasyTabNodeDriver RootDriver {private set;  get; }
-        
-        [PublicAPI, Obsolete("Use Conditions for limiting of traversing and selectable")]
-        public void SetTransformDriver([NotNull] IEasyTabNodeDriver<Transform> transformDriver)
-        {
-            if (transformDriver == null)
-                throw new ArgumentNullException(nameof(transformDriver));
-
-            TransformDriver = transformDriver;
-        }
 
         public EasyTabNodeDriver()
         {
@@ -32,10 +23,9 @@ namespace EasyTab
             RootDriver = new RootDriver(SceneDriver);
         }
 
-        internal EasyTabNode CreateNode(Transform target)
+        internal EasyTabNode CreateNode(Transform transform)
         {
-            var targetNodeCandidate = EasyTabNode.ByDriver(target, TransformDriver);
-
+            var targetNodeCandidate = new EasyTabNode(transform, TransformDriver);
             return targetNodeCandidate;
         }
     }

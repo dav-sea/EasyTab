@@ -239,11 +239,9 @@ namespace EasyTab
         private GameObject GetNextWithoutPolicies(EasyTabNode currentNode, bool reverse)
         {
             var next = _easyTabNodeSolver.FindNextTab(currentNode, reverse);
-            if (!next.IsNone)
-            {
-                var nextTransform = (Component)next.GetTarget(); // target is EasyTab or Transform
-                return nextTransform.gameObject;
-            }
+            var nextTarget = next.GetTarget2();
+            if (nextTarget.IsTransform)
+                return nextTarget.AsTransform.gameObject;
 
             return null;
         }

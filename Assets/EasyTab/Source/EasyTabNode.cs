@@ -1,15 +1,14 @@
-using System;
 using JetBrains.Annotations;
 
 namespace EasyTab
 {
     /// <summary>
     /// This structure is an element of the hierarchy of objects in Unity.
-    /// Provides a uniform API for working with hierarchy, encapsulating a driver that can work with either Transform, Scene, or root
+    /// Provides a uniform API for working with hierarchy, encapsulating a driver that can work with either AsTransform, AsScene, or root
     /// </summary>
     public struct EasyTabNode
     {
-        [CanBeNull] private readonly object _target;
+        private readonly TransformOrScene _target;
 
         [NotNull] private readonly IEasyTabNodeDriver _nodeDriver;
 
@@ -23,18 +22,10 @@ namespace EasyTab
 
         public static EasyTabNode None => new EasyTabNode();
 
-        internal EasyTabNode([CanBeNull] object target, [NotNull] IEasyTabNodeDriver easyTabNodeDriver)
+        internal EasyTabNode(TransformOrScene target, [NotNull] IEasyTabNodeDriver easyTabNodeDriver)
         {
             _target = target;
             _nodeDriver = easyTabNodeDriver;
-        }
-
-        public static EasyTabNode ByDriver<T>([NotNull] T target, [NotNull] IEasyTabNodeDriver<T> driver)
-        {
-            if (target == null) throw new ArgumentNullException(nameof(target));
-            if (driver == null) throw new ArgumentNullException(nameof(driver));
-            
-            return new EasyTabNode(target, driver);
         }
 
         public EasyTabNode GetChild(int childNumber)
@@ -52,6 +43,6 @@ namespace EasyTab
             return -1;
         }
 
-        public object GetTarget() => _target;
+        public TransformOrScene GetTarget2() => _target;
     }
 }

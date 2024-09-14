@@ -6,36 +6,35 @@ namespace EasyTab
 {
     public sealed class RootDriver : IEasyTabNodeDriver
     {
-        private readonly IEasyTabNodeDriver<Scene> _sceneDriver;
+        private readonly IEasyTabNodeDriver _sceneDriver;
 
-        public RootDriver([NotNull] IEasyTabNodeDriver<Scene> sceneDriver)
+        public RootDriver([NotNull] IEasyTabNodeDriver sceneDriver)
         {
             _sceneDriver = sceneDriver ?? throw new ArgumentNullException(nameof(sceneDriver));
         }
 
-        public BorderMode GetBorderMode(object _)
+        public BorderMode GetBorderMode(TransformOrScene _)
         {
             return BorderMode.Roll;
         }
 
-        public EasyTabNode GetParent(object _)
+        public EasyTabNode GetParent(TransformOrScene _)
         {
             return EasyTabNode.None;
         }
 
-        public EasyTabNode GetChild(object _, int childNumber)
+        public EasyTabNode GetChild(TransformOrScene _, int childNumber)
         {
             var scene = SceneManager.GetSceneAt(childNumber);
-            
-            return EasyTabNode.ByDriver(scene, _sceneDriver);
+            return new EasyTabNode(scene, _sceneDriver);
         }
 
-        public int GetChildrenCount(object _)
+        public int GetChildrenCount(TransformOrScene _)
         {
             return SceneManager.sceneCount;
         }
 
-        public bool IsSelectable(object _)
+        public bool IsSelectable(TransformOrScene _)
         {
             return false;
         }
