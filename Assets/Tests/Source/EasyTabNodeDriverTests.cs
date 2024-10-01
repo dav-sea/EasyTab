@@ -28,9 +28,9 @@ namespace EasyTab.Tests
             window3.GetComponent<Window>().IsActive = true;
 
             var easyTabIntegration = new EasyTabIntegration();
-            var conditions = easyTabIntegration.Solver.Drivers.Conditions.BlockingTraversingChildren;
-
-            conditions.Add(t => t.TryGetComponent<Window>(out var window) && !window.IsActive);
+            var solver = easyTabIntegration.Solver;
+            solver.Driver = solver.Driver
+                .WithTraversingChildrenBlocking(t => t.TryGetComponent(out Window window) && !window.IsActive);
 
             EventSystem.current.SetSelectedGameObject(selectable1);
             Assert.AreEqual(selectable1, EventSystem.current.currentSelectedGameObject);
@@ -53,9 +53,9 @@ namespace EasyTab.Tests
 
             var easyTabIntegration = new EasyTabIntegration();
             var solver = easyTabIntegration.Solver;
-            solver.Driver = solver.Driver.WithSelectableBlocking(t => t.TryGetComponent<Graphic>(out var graphic) && graphic.color.a <= 0)
+            solver.Driver = solver.Driver
+                .WithSelectableBlocking(t => t.TryGetComponent<Graphic>(out var graphic) && graphic.color.a <= 0);
 
-            conditions.Add();
 
             EventSystem.current.SetSelectedGameObject(selectable1);
             Assert.AreEqual(selectable1, EventSystem.current.currentSelectedGameObject);

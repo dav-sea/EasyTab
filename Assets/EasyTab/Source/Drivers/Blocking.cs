@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace EasyTab
 {
-    public static class Conditions
+    public static class Blocking
     {
-        public static bool CanvasGroupIsInteractable(Target target)
+        public static bool CanvasGroupIsNotInteractable(Target target)
             => target.IsTransform(out var transform)
                && transform.TryGetComponent<CanvasGroup>(out var canvasGroup)
                && !canvasGroup.interactable;
@@ -14,13 +15,8 @@ namespace EasyTab
                && transform.TryGetComponent<CanvasGroup>(out var canvasGroup)
                && canvasGroup.alpha <= 0;
         
-        public static bool GameObjectIsActive(Target target)
+        public static bool GameObjectIsNotActive(Target target)
             => target.IsTransform(out var transform)
                && !transform.gameObject.activeInHierarchy;
-        
-        public static bool SelectableIsInteractableAndEnabled(Target target)
-            => target.IsTransform(out var transform)
-               && transform.TryGetComponent<Selectable>(out var selectable)
-               && (!selectable.enabled || !selectable.interactable);
     }
 }

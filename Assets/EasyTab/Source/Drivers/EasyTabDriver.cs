@@ -110,7 +110,9 @@ namespace EasyTab
                         && easyTabComponent.SelectableRecognition == SelectableRecognition.AsNotSelectable)
                         return false;
 
-                    return transform.TryGetComponent<Selectable>(out _);
+                    return transform.TryGetComponent(out Selectable selectable) 
+                           && selectable.enabled 
+                           && selectable.interactable;
 
                 case TargetType.Scene:
                     return false;
@@ -149,9 +151,8 @@ namespace EasyTab
                    return Fail_InvalidOperationForTargetType<BorderMode>(target.TargetType);
             }
         }
-
-        [TerminatesProgram]
-        private T Fail_InvalidOperationForTargetType<T>(TargetType targetType)
+        
+        private _ Fail_InvalidOperationForTargetType<_>(TargetType targetType)
             => throw new InvalidOperationException($"This operation cannot be performed for {targetType} target");
     }
 }

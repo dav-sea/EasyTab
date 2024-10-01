@@ -19,7 +19,7 @@ namespace EasyTab
 
         public GameObject EntryPoint { set; get; }
         public GameObject LastSelected { set; get; }
-        
+
         private readonly EasyTabNodeSolver _easyTabNodeSolver = new EasyTabNodeSolver();
 
         private IEasyTabDriver _driver;
@@ -31,19 +31,35 @@ namespace EasyTab
             set => _driver = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public EasyTabSolver(bool useDefaultDriver)
+        public EasyTabSolver()
         {
-            _driver = new EasyTabDriver(this);
+            var easyTabDriver = new EasyTabDriver(this);
 
-            if (!useDefaultDriver)
-                return;
+            var decoratableDriver = easyTabDriver.ToDecoratable();
+            decoratableDriver.GetChildrenCountDelegate = (driver, target) =>
+            {
+                if (Blocking.GameObjectIsNotActive(target)
+                    || Blocking.CanvasGroupIsNotInteractable(target)
+                    || Blocking.CanvasGroupIsNotTransparent(target))
+                    return 0;
 
-            _driver = _driver
-                .WithSelectableBlocking(Conditions.GameObjectIsActive)
-                .WithSelectableBlocking(Conditions.SelectableIsInteractableAndEnabled)
-                .WithTraversingChildrenBlocking(Conditions.GameObjectIsActive)
-                .WithTraversingChildrenBlocking(Conditions.CanvasGroupIsInteractable)
-                .WithTraversingChildrenBlocking(Conditions.CanvasGroupIsNotTransparent);
+                return driver.GetChildrenCount(target);
+            };
+
+            decoratableDriver.IsSelectableDelegate = (driver, target) =>
+            {
+                if (Blocking.GameObjectIsNotActive(target))
+                    return false;
+
+                return driver.IsSelectable(target);
+            };
+            
+            _driver = decoratableDriver;
+        }
+
+        public EasyTabSolver([NotNull] IEasyTabDriver driver)
+        {
+            _driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
 
         /// <summary>
@@ -176,27 +192,27 @@ namespace EasyTab
 
             return null;
         }
-        
-        private bool ParentsIsCorrect(Transform target) 
+
+        private bool ParentsIsCorrect(Transform target)
             => TryGetValidParent(target, out var result) && target.parent == result;
 
         private EasyTabNode FindStartNodeRelativeBy(Transform target)
         {
-            if (!TryGetValidParent(target, out var result)) 
+            if (!TryGetValidParent(target, out var result))
                 target = result;
 
             return this.CreateNode(target);
         }
-        
+
         private bool TryGetValidParent(Transform current, out Transform bestParent)
         {
             bestParent = null;
-            
+
             var parent = current.parent;
             if (!parent)
                 // if parent is null then is 'current' is one of root transform
                 return true;
-            
+
             // This is a recursion that goes up to the roots
             if (TryGetValidParent(parent, out var upperBestParent))
             {

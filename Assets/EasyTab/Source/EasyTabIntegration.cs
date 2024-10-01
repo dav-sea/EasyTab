@@ -11,7 +11,7 @@ namespace EasyTab
     /// </summary>
     public sealed partial class EasyTabIntegration
     {
-        public readonly EasyTabSolver Solver = new EasyTabSolver(useDefaultDriver: true);
+        public readonly EasyTabSolver Solver = new EasyTabSolver();
 
         public void UpdateAll()
         {
