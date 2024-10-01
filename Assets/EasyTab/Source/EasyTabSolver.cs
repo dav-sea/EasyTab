@@ -279,7 +279,7 @@ namespace EasyTab
 
         private GameObject GetNextWithoutPolicies(EasyTabNode currentNode, bool reverse)
         {
-            var next = _easyTabNodeSolver.FindNextTab(currentNode, reverse);
+            var next = _easyTabNodeSolver.FindNext(currentNode, reverse);
             var nextTarget = next.GetTarget();
             if (nextTarget.IsTransform)
                 return nextTarget.AsTransform.gameObject;
