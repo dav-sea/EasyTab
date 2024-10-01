@@ -11,7 +11,7 @@ namespace EasyTab
     /// </summary>
     public sealed partial class EasyTabIntegration
     {
-        public readonly EasyTabSolver Solver = new EasyTabSolver();
+        public readonly EasyTabSolver Solver = new EasyTabSolver(useDefaultDriver: true);
 
         public void UpdateAll()
         {
@@ -33,7 +33,7 @@ namespace EasyTab
             shiftPressed = Input.GetKey(KeyCode.LeftShift);
             enterPressed = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter);
 #endif
-            
+
             if (tabPressed || enterPressed)
                 Navigate(reverse: shiftPressed, isEnter: enterPressed);
         }

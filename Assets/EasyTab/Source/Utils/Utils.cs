@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 using UnityEngine.LowLevel;
 
 namespace EasyTab.Internals
@@ -13,5 +12,7 @@ namespace EasyTab.Internals
 
         internal static bool Has(this FallbackNavigationPolicy self, FallbackNavigationPolicy policy) 
             => (self & policy) == policy;
+
+       
     }
 }

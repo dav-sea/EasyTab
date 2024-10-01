@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using EasyTab.Internals;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +10,7 @@ namespace EasyTab
     /// <summary>
     /// The solver's task is to determine the next selectable object relative to the game object.
     /// </summary>
-    public sealed class EasyTabSolver
+    public sealed class EasyTabSolver : IEasyTabDriverProvider
     {
         public FallbackNavigationPolicy WhenCurrentIsNotSet { set; get; } =
             FallbackNavigationPolicy.AllowNavigateToLastSelected | FallbackNavigationPolicy.AllowNavigateToEntryPoint;
@@ -17,9 +19,32 @@ namespace EasyTab
 
         public GameObject EntryPoint { set; get; }
         public GameObject LastSelected { set; get; }
-
-        public readonly EasyTabNodeDriver Drivers = new EasyTabNodeDriver();
+        
         private readonly EasyTabNodeSolver _easyTabNodeSolver = new EasyTabNodeSolver();
+
+        private IEasyTabDriver _driver;
+
+        [NotNull]
+        public IEasyTabDriver Driver
+        {
+            get => _driver;
+            set => _driver = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public EasyTabSolver(bool useDefaultDriver)
+        {
+            _driver = new EasyTabDriver(this);
+
+            if (!useDefaultDriver)
+                return;
+
+            _driver = _driver
+                .WithSelectableBlocking(Conditions.GameObjectIsActive)
+                .WithSelectableBlocking(Conditions.SelectableIsInteractableAndEnabled)
+                .WithTraversingChildrenBlocking(Conditions.GameObjectIsActive)
+                .WithTraversingChildrenBlocking(Conditions.CanvasGroupIsInteractable)
+                .WithTraversingChildrenBlocking(Conditions.CanvasGroupIsNotTransparent);
+        }
 
         /// <summary>
         /// A collection of visited objects during jumps. 
@@ -90,7 +115,7 @@ namespace EasyTab
             if (NeedUseJumping(current, out var jumping, out var nextJump, out var reverseJump))
             {
                 var candidate = reverse ? reverseJump : nextJump;
-                var candidateNode = candidate ? Drivers.CreateNode(candidate.transform) : EasyTabNode.None;
+                var candidateNode = candidate ? this.CreateNode(candidate.transform) : EasyTabNode.None;
 
                 if (!candidateNode.IsNone && candidateNode.IsSelectable)
                     return candidate;
@@ -109,6 +134,7 @@ namespace EasyTab
                             return null;
                         }
 
+                        // TODO: mb use GetNextImpl ???
                         var next = GetNext(candidate, reverse);
                         if (next)
                             return next;
@@ -159,7 +185,7 @@ namespace EasyTab
             if (!TryGetValidParent(target, out var result)) 
                 target = result;
 
-            return Drivers.CreateNode(target);
+            return this.CreateNode(target);
         }
         
         private bool TryGetValidParent(Transform current, out Transform bestParent)
@@ -174,7 +200,7 @@ namespace EasyTab
             // This is a recursion that goes up to the roots
             if (TryGetValidParent(parent, out var upperBestParent))
             {
-                var parentNode = Drivers.CreateNode(parent);
+                var parentNode = this.CreateNode(parent);
                 if (parentNode.ChildrenCount == 0)
                 {
                     bestParent = parent;
@@ -239,11 +265,13 @@ namespace EasyTab
         private GameObject GetNextWithoutPolicies(EasyTabNode currentNode, bool reverse)
         {
             var next = _easyTabNodeSolver.FindNextTab(currentNode, reverse);
-            var nextTarget = next.GetTarget2();
+            var nextTarget = next.GetTarget();
             if (nextTarget.IsTransform)
                 return nextTarget.AsTransform.gameObject;
 
             return null;
         }
+
+        IEasyTabDriver IEasyTabDriverProvider.GetDriver() => Driver;
     }
 }
