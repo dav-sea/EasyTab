@@ -149,9 +149,8 @@ namespace EasyTab
                             Debug.LogError("Cyclic link detected in jumps");
                             return null;
                         }
-
-                        // TODO: mb use GetNextImpl ???
-                        var next = GetNext(candidate, reverse);
+                        
+                        var next = GetNextImpl(candidate, reverse);
                         if (next)
                             return next;
                         break;
