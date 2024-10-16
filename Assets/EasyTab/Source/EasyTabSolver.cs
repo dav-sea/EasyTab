@@ -20,10 +20,17 @@ namespace EasyTab
         public GameObject EntryPoint { set; get; }
         public GameObject LastSelected { set; get; }
 
-        private readonly EasyTabNodeSolver _easyTabNodeSolver = new EasyTabNodeSolver();
-
+        /// <summary>
+        /// A collection of visited objects during jumps. 
+        /// It is needed to detect recursive jumps and prevent an uncaught StackOverflowException and application crash
+        /// </summary>
+        private readonly HashSet<GameObject> _visitedGameObjects = new HashSet<GameObject>();
+        private readonly EasyTabHierarchySolver _hierarchySolver = new EasyTabHierarchySolver();
         private IEasyTabDriver _driver;
-
+        
+        
+        public EasyTabSolver() => _driver = new EasyTabDriver(this);
+        
         [NotNull]
         public IEasyTabDriver Driver
         {
@@ -31,171 +38,147 @@ namespace EasyTab
             set => _driver = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public EasyTabSolver()
-        {
-            var easyTabDriver = new EasyTabDriver(this);
-
-            var decoratableDriver = easyTabDriver.ToDecoratable();
-            decoratableDriver.GetChildrenCountDelegate = (driver, target) =>
-            {
-                if (Blocking.GameObjectIsNotActive(target)
-                    || Blocking.CanvasGroupIsNotInteractable(target)
-                    || Blocking.CanvasGroupIsNotTransparent(target))
-                    return 0;
-
-                return driver.GetChildrenCount(target);
-            };
-
-            decoratableDriver.IsSelectableDelegate = (driver, target) =>
-            {
-                if (Blocking.GameObjectIsNotActive(target))
-                    return false;
-
-                return driver.IsSelectable(target);
-            };
-            
-            _driver = decoratableDriver;
-        }
-
-        public EasyTabSolver([NotNull] IEasyTabDriver driver)
-        {
-            _driver = driver ?? throw new ArgumentNullException(nameof(driver));
-        }
-
-        /// <summary>
-        /// A collection of visited objects during jumps. 
-        /// It is needed to detect recursive jumps and prevent an uncaught StackOverflowException and application crash
-        /// </summary>
-        private HashSet<GameObject> _visitedGameObjects = new HashSet<GameObject>();
-
-        public GameObject GetNext(GameObject current, bool reverse = false, bool isEnterKey = false)
+        public GameObject GetNext(GameObject current, bool reverse, bool isEnterKey = false)
         {
             try
             {
-                return GetNextImpl(current, reverse, isEnterKey);
+                var next = GetNextImpl(current, reverse, isEnterKey);
+                return next.Target.IsTransform(out var nextTransform) ? nextTransform.gameObject : null;
             }
             finally // ..but if a real StackOverflowException is thrown, the application will crash
             {
                 _visitedGameObjects.Clear();
             }
         }
-
-        private GameObject GetNextImpl(GameObject current, bool reverse = false, bool isEnterKey = false)
+        
+        public GameObject GetNextWithoutPolicy(GameObject current, bool reverse)
         {
-            bool IsCorrectFallback(GameObject fallback)
+            try
             {
-                if (!fallback)
-                    return false;
+                var currentNode = this.CreateNode(current.transform);
+                var next = GetNextWithoutPolicyImpl(currentNode, reverse);
+                return next.Target.IsTransform(out var nextTransform) ? nextTransform.gameObject : null;
+            }
+            finally // ..but if a real StackOverflowException is thrown, the application will crash
+            {
+                _visitedGameObjects.Clear();
+            }
+        }
+        
+        bool IsCorrectFallback(GameObject fallback)
+        {
+            if (!fallback)
+                return false;
 
-                if (!ParentsIsCorrect(fallback.transform))
-                    return false;
+            var fallbackTransform = fallback.transform;
+            if (!TryGetValidParent(fallbackTransform, out var result)
+                || fallbackTransform.parent != result)
+                return false;
 
-                var fallbackNode = FindStartNodeRelativeBy(fallback.transform);
-                if (!fallbackNode.IsSelectable)
-                    return false;
+            var fallbackNode = this.CreateNode(fallbackTransform);
+            return fallbackNode.IsSelectable;
+        }
 
-                return true;
+        private EasyTabNode GetNextWithoutPolicyImpl(EasyTabNode currentNode, bool reverse = false)
+        {
+            if (!NeedUseJumping(currentNode, out var policy, out var nextJump, out var reverseJump))
+                return GetNextByHierarchy(currentNode, reverse);
+
+            var jumpTarget = reverse ? reverseJump : nextJump;
+            var jumpTargetNode = jumpTarget ? this.CreateNode(jumpTarget.transform) : EasyTabNode.None;
+
+            if (!jumpTargetNode.IsNone && jumpTargetNode.IsSelectable)
+                return jumpTargetNode;
+
+            if (policy == JumpingPolicy.UseOnlyJumps)
+                return EasyTabNode.None;
+
+            if (policy == JumpingPolicy.UseJumpsOrTheirNext)
+            {
+                if (jumpTargetNode.IsNone)
+                    return EasyTabNode.None;
+                
+                if (!_visitedGameObjects.Add(jumpTarget))
+                {
+                    // test-case: UseJumpsOrTheirNextTestCase5
+                    Debug.LogError("Cyclic link detected in jumps");
+                    return EasyTabNode.None;
+                }
+
+                return GetNextWithoutPolicyImpl(jumpTargetNode, reverse);
             }
 
+            if (policy == JumpingPolicy.UseJumpsOrHierarchy)
+                return GetNextByHierarchy(currentNode, reverse);
+            
+            throw new NotImplementedException($"Unsupported JumpingPolicy {policy}");
+        }
+
+        private EasyTabNode GetFallbackWhenCurrentIsNotSet()
+        {
+            var policy = WhenCurrentIsNotSet;
+
+            if (policy.Has(FallbackNavigationPolicy.AllowNavigateToLastSelected) && IsCorrectFallback(LastSelected))
+                return this.CreateNode(LastSelected.transform);
+            if (policy.Has(FallbackNavigationPolicy.AllowNavigateToEntryPoint) && IsCorrectFallback(EntryPoint))
+                return this.CreateNode(EntryPoint.transform);
+
+            return EasyTabNode.None;
+        }
+
+        private EasyTabNode GetFallbackWhenCurrentIsNotSelectable(EasyTabNode currentNode, bool reverse)
+        {
+            var policy = WhenCurrentIsNotSelectable;
+
+            if (policy.Has(FallbackNavigationPolicy.AllowNavigateToLastSelected) && IsCorrectFallback(LastSelected))
+                return this.CreateNode(LastSelected.transform);
+
+            if (policy.Has(FallbackNavigationPolicy.AllowNavigateToClosest))
+            {
+                var next = GetNextByHierarchy(currentNode, reverse);
+                if (!next.IsNone)
+                    return next;
+            }
+
+            if (policy.Has(FallbackNavigationPolicy.AllowNavigateToEntryPoint) && IsCorrectFallback(EntryPoint))
+                return this.CreateNode(EntryPoint.transform);
+
+            return EasyTabNode.None;
+        }
+        
+        private EasyTabNode GetNextImpl(GameObject current, bool reverse = false, bool isEnterKey = false)
+        {
             if (!current)
-            {
-                if (isEnterKey)
-                    return null;
+                return isEnterKey ? EasyTabNode.None : GetFallbackWhenCurrentIsNotSet();
 
-                var policy = WhenCurrentIsNotSet;
-
-                if (policy.Has(FallbackNavigationPolicy.AllowNavigateToLastSelected) && IsCorrectFallback(LastSelected))
-                    return LastSelected;
-                if (policy.Has(FallbackNavigationPolicy.AllowNavigateToEntryPoint) && IsCorrectFallback(EntryPoint))
-                    return EntryPoint;
-
-                return null;
-            }
-
-            ExtractOptions(current, out var needLock, out var needHandleEnter);
+            ExtractNavigationOptions(current, out var needLock, out var needHandleEnter);
 
             if (isEnterKey && !needHandleEnter)
-                return null;
+                return EasyTabNode.None;
 
             if (needLock)
-                return null;
+                return EasyTabNode.None;
 
-            var currentNode = FindStartNodeRelativeBy(current.transform);
+            var currentNode = FindFirstNodeWithValidParent(current.transform);
 
             if (currentNode.IsNone)
             {
                 Debug.LogError($"Internal error. Report the problem using the link: {Utils.LinkToReportIssues}");
-                return null;
+                return EasyTabNode.None;
             }
 
-            if (NeedUseJumping(current, out var jumping, out var nextJump, out var reverseJump))
-            {
-                var candidate = reverse ? reverseJump : nextJump;
-                var candidateNode = candidate ? this.CreateNode(candidate.transform) : EasyTabNode.None;
+            var next2 = GetNextWithoutPolicyImpl(currentNode, reverse);
+            if (next2.Target.IsTransform)
+                return next2;
 
-                if (!candidateNode.IsNone && candidateNode.IsSelectable)
-                    return candidate;
+            // is jumping continuation in same case...
+            if (currentNode.IsSelectable)
+                return EasyTabNode.None;
 
-                // fallback
-                switch (jumping)
-                {
-                    case JumpingPolicy.UseOnlyJumps:
-                        return null;
-                    case JumpingPolicy.UseJumpsOrTheirNext when !candidateNode.IsNone:
-                    {
-                        if (!_visitedGameObjects.Add(candidate))
-                        {
-                            // test-case: UseJumpsOrTheirNextTestCase5
-                            Debug.LogError("Cyclic link detected in jumps");
-                            return null;
-                        }
-                        
-                        var next = GetNextImpl(candidate, reverse);
-                        if (next)
-                            return next;
-                        break;
-                    }
-                    case JumpingPolicy.UseJumpsOrHierarchy:
-                    {
-                        var next = GetNextWithoutPolicies(currentNode, reverse);
-                        if (next)
-                            return next;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                return GetNextWithoutPolicies(currentNode, reverse);
-            }
-
-            if (!currentNode.IsSelectable)
-            {
-                var policy = WhenCurrentIsNotSelectable;
-
-                if (policy.Has(FallbackNavigationPolicy.AllowNavigateToLastSelected) && IsCorrectFallback(LastSelected))
-                    return LastSelected;
-
-                if (policy.Has(FallbackNavigationPolicy.AllowNavigateToClosest))
-                {
-                    var next = GetNextWithoutPolicies(currentNode, reverse);
-                    if (next)
-                        return next;
-                }
-
-                if (policy.Has(FallbackNavigationPolicy.AllowNavigateToEntryPoint) && IsCorrectFallback(EntryPoint))
-                    return EntryPoint;
-
-                return null;
-            }
-
-            return null;
+            return GetFallbackWhenCurrentIsNotSelectable(currentNode, reverse);
         }
-
-        private bool ParentsIsCorrect(Transform target)
-            => TryGetValidParent(target, out var result) && target.parent == result;
-
-        private EasyTabNode FindStartNodeRelativeBy(Transform target)
+        
+        private EasyTabNode FindFirstNodeWithValidParent(Transform target)
         {
             if (!TryGetValidParent(target, out var result))
                 target = result;
@@ -230,7 +213,7 @@ namespace EasyTab
             return false;
         }
 
-        private void ExtractOptions(GameObject target, out bool needLock, out bool needHandleEnter)
+        private void ExtractNavigationOptions(GameObject target, out bool needLock, out bool needHandleEnter)
         {
             needLock = false;
             needHandleEnter = false;
@@ -260,11 +243,16 @@ namespace EasyTab
                     : easyTab.EnterHandling == EnterHandling.NavigateNext;
             }
         }
-
-        private bool NeedUseJumping(GameObject target, out JumpingPolicy jumpingPolicy, out GameObject next,
+        
+        private bool NeedUseJumping(EasyTabNode node, out JumpingPolicy jumpingPolicy, out GameObject next,
             out GameObject reverse)
         {
-            if (!target.TryGetComponent<EasyTab>(out var easyTab))
+            if (!node.Target.IsTransform)
+                throw new InvalidOperationException("Cant get jumps from not a transform");
+
+            var nodeTransform = node.Target.AsTransform;
+            
+            if (!nodeTransform.TryGetComponent<EasyTab>(out var easyTab))
             {
                 jumpingPolicy = default;
                 next = reverse = default;
@@ -277,15 +265,8 @@ namespace EasyTab
             return jumpingPolicy != JumpingPolicy.DontUseJumps;
         }
 
-        private GameObject GetNextWithoutPolicies(EasyTabNode currentNode, bool reverse)
-        {
-            var next = _easyTabNodeSolver.FindNext(currentNode, reverse);
-            var nextTarget = next.GetTarget();
-            if (nextTarget.IsTransform)
-                return nextTarget.AsTransform.gameObject;
-
-            return null;
-        }
+        private EasyTabNode GetNextByHierarchy(EasyTabNode currentNode, bool reverse) 
+            => _hierarchySolver.FindNext(currentNode, reverse);
 
         IEasyTabDriver IEasyTabDriverProvider.GetDriver() => Driver;
     }

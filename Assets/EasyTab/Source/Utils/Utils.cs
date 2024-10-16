@@ -12,7 +12,5 @@ namespace EasyTab.Internals
 
         internal static bool Has(this FallbackNavigationPolicy self, FallbackNavigationPolicy policy) 
             => (self & policy) == policy;
-
-       
     }
 }

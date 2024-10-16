@@ -22,6 +22,8 @@ namespace EasyTab
 
         public static EasyTabNode None => default;
 
+        public Target Target => _target;
+
         internal EasyTabNode(Target target, [NotNull] IEasyTabDriver easyTabTargetDriver)
         {
             _target = target;
@@ -41,7 +43,5 @@ namespace EasyTab
 
             return -1;
         }
-
-        public Target GetTarget() => _target;
     }
 }

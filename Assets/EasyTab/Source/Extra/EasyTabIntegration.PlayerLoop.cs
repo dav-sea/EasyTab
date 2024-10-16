@@ -83,11 +83,12 @@ namespace EasyTab
 
             PlayerLoop.SetPlayerLoop(playerLoop);
         }
-        
+
         private static void InjectGloballyEasyTabIntegrationToPlayerLoop()
         {
+#if UNITY_EDITOR // When closing the application (Unity Player), we can not waste time removing an element from the PlayerLoop
             Application.quitting += RemoveGloballyEasyTabIntegrationFromPlayerLoop;
-
+#endif
             var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
 
             var easyTabSystem = new PlayerLoopSystem

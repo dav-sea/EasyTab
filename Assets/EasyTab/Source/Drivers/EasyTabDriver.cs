@@ -35,7 +35,7 @@ namespace EasyTab
                     return _driverProvider.CreateNode(parentTarget);
 
                 case TargetType.Scene:
-                    return  _driverProvider.CreateNode(Target.Root);
+                    return _driverProvider.CreateNode(Target.Root);
 
                 case TargetType.Root:
                     return EasyTabNode.None;
@@ -67,7 +67,7 @@ namespace EasyTab
                     _listOfGameObjects.Clear();
 
                     return _driverProvider.CreateNode(childGameObject.transform);
-                
+
                 default:
                     return Fail_InvalidOperationForTargetType<EasyTabNode>(target.TargetType);
             }
@@ -81,8 +81,15 @@ namespace EasyTab
                     return SceneManager.sceneCount;
 
                 case TargetType.Transform:
-
                     var transform = target.AsTransform;
+
+                    if (!transform.gameObject.activeSelf)
+                        return 0;
+
+                    if (transform.TryGetComponent(out CanvasGroup canvasGroup))
+                        if (!canvasGroup.interactable || canvasGroup.alpha == 0)
+                            return 0;
+
                     if (transform.TryGetComponent<EasyTab>(out var easyTabComponent)
                         && easyTabComponent.ChildrenExtracting == ChildrenExtracting.WithoutChildren)
                         return 0;
@@ -91,7 +98,7 @@ namespace EasyTab
 
                 case TargetType.Scene:
                     return target.AsScene.rootCount;
-                
+
                 default:
                     return Fail_InvalidOperationForTargetType<int>(target.TargetType);
             }
@@ -106,12 +113,15 @@ namespace EasyTab
 
                 case TargetType.Transform:
                     var transform = target.AsTransform;
+                    if (!transform.gameObject.activeSelf)
+                        return false;
+
                     if (transform.TryGetComponent<EasyTab>(out var easyTabComponent)
                         && easyTabComponent.SelectableRecognition == SelectableRecognition.AsNotSelectable)
                         return false;
 
-                    return transform.TryGetComponent(out Selectable selectable) 
-                           && selectable.enabled 
+                    return transform.TryGetComponent(out Selectable selectable)
+                           && selectable.enabled
                            && selectable.interactable;
 
                 case TargetType.Scene:
@@ -148,10 +158,10 @@ namespace EasyTab
                     return BorderMode.Escape;
 
                 default:
-                   return Fail_InvalidOperationForTargetType<BorderMode>(target.TargetType);
+                    return Fail_InvalidOperationForTargetType<BorderMode>(target.TargetType);
             }
         }
-        
+
         private _ Fail_InvalidOperationForTargetType<_>(TargetType targetType)
             => throw new InvalidOperationException($"This operation cannot be performed for {targetType} target");
     }

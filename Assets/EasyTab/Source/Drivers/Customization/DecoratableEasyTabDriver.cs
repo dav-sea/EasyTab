@@ -8,6 +8,7 @@ namespace EasyTab
     /// through delegates. It enables dynamic modification of key operations such as determining the border mode, 
     /// parent and child nodes, children count, and selectability of targets.
     /// </summary>
+    [PublicAPI]
     public sealed class DecoratableEasyTabDriver : IEasyTabDriver
     {
         public readonly IEasyTabDriver Decorated;

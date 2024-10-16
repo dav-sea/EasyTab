@@ -2,7 +2,7 @@
 
 namespace EasyTab
 {
-    internal sealed class EasyTabNodeSolver
+    internal sealed class EasyTabHierarchySolver
     {
         public EasyTabNode FindNext(EasyTabNode current, bool reverse)
         {
