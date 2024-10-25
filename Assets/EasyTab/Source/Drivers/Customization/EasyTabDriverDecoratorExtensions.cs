@@ -126,7 +126,7 @@ namespace EasyTab
         [Pure]
         public static IEasyTabDriver WithTargetSelectableBlocking(this IEasyTabDriver self,
             Predicate<Target> blockingPredicate)
-            => self.DecorateIsSelectable((driver, target) => !blockingPredicate(target) && driver.IsSelectable(target));
+            => self.DecorateIsSelectable((@base, target) => !blockingPredicate(target) && @base.IsSelectable(target));
 
         /// <summary>
         /// Adds a decorator that blocks child traversal based on a predicate. 
@@ -138,8 +138,8 @@ namespace EasyTab
         [Pure]
         public static IEasyTabDriver WithTargetTraversingChildrenBlocking(this IEasyTabDriver self,
             Predicate<Target> blockingPredicate)
-            => self.DecorateGetChildrenCount((driver, target) =>
-                blockingPredicate(target) ? 0 : driver.GetChildrenCount(target));
+            => self.DecorateGetChildrenCount((@base, target) =>
+                blockingPredicate(target) ? 0 : @base.GetChildrenCount(target));
 
         /// <summary>
         /// Adds a decorator that blocks selection of <see cref="Transform"/> targets based on a predicate. 
@@ -151,8 +151,8 @@ namespace EasyTab
         [Pure]
         public static IEasyTabDriver WithSelectableBlocking(this IEasyTabDriver self,
             Predicate<Transform> blockingPredicate)
-            => self.DecorateIsSelectable((driver, target) =>
-                target.IsTransform(out var transform) && !blockingPredicate(transform) && driver.IsSelectable(target));
+            => self.DecorateIsSelectable((@base, target) =>
+                target.IsTransform(out var transform) && !blockingPredicate(transform) && @base.IsSelectable(target));
 
         /// <summary>
         /// Adds a decorator that blocks child traversal for <see cref="Transform"/> targets based on a predicate. 
@@ -164,9 +164,9 @@ namespace EasyTab
         [Pure]
         public static IEasyTabDriver WithTraversingChildrenBlocking(this IEasyTabDriver self,
             Predicate<Transform> blockingPredicate)
-            => self.DecorateGetChildrenCount((driver, target) =>
+            => self.DecorateGetChildrenCount((@base, target) =>
                 target.IsTransform(out var transform) && blockingPredicate(transform)
                     ? 0
-                    : driver.GetChildrenCount(target));
+                    : @base.GetChildrenCount(target));
     }
 }
