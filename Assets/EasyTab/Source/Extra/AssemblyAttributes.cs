@@ -4,4 +4,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("EasyTab.Tests.Runtime")]
 
 [assembly: AssemblyTitle( "EasyTab" )]
-[assembly: AssemblyVersion( "1.2.0" )]
+[assembly: AssemblyVersion( "1.3.0" )]

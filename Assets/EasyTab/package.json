@@ -1,6 +1,6 @@
 {
   "name": "com.dav-sea.easy-tab",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "displayName": "Easy Tab",
   "description": "A simple package that allows you to easily implement Tab-key navigation functionality between Selectables. This package is very easy to install and also easy to customize if needed",
   "unity": "2017.4",
