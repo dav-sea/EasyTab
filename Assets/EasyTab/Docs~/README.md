@@ -145,7 +145,7 @@ Everything is ready! If the installation of the package was successful, then now
 
 🕹️ The ability to independently control navigation through the code
 
-✨ The ability to define additional blocking conditions for the availability of objects [(by decorate default Driver)]((#integration-with-your-tools))
+✨ The ability to define additional blocking conditions for the availability of objects [(by decorate default Driver)](#integration-with-your-tools)
 
 # Configuration
 The package provides several configuration levels: `EasyTab` (component), `EasyTabIntegration`, `EasyTabSolver`
