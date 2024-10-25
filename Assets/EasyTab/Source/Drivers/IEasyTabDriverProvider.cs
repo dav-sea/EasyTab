@@ -5,6 +5,6 @@ namespace EasyTab
     /// </summary>
     public interface IEasyTabDriverProvider
     {
-        public IEasyTabDriver GetDriver();
+        IEasyTabDriver GetDriver();
     }
 }

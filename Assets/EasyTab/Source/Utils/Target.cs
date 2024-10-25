@@ -50,7 +50,15 @@ namespace EasyTab
         public override bool Equals(object obj) 
             => obj is Target other && Equals(other);
 
-        public override int GetHashCode() 
-            => HashCode.Combine((int)_type, _transform, _scene);
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (int)_type;
+                hashCode = (hashCode * 397) ^ (_transform != null ? _transform.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ _scene.GetHashCode();
+                return hashCode;
+            }
+        }
     }
 }
