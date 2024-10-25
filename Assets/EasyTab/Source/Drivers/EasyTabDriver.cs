@@ -29,8 +29,8 @@ namespace EasyTab
                     var transformParent = transform.parent;
 
                     Target parentTarget = transformParent
-                        ? transformParent
-                        : transform.gameObject.scene;
+                        ? (Target) transformParent
+                        : (Target) transform.gameObject.scene;
 
                     return _driverProvider.CreateNode(parentTarget);
 
