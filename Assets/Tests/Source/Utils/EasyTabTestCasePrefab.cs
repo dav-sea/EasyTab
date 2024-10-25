@@ -40,12 +40,12 @@ namespace EasyTab.Tests
             solver.WhenCurrentIsNotSet = WhenCurrentIsNotSet;
             solver.WhenCurrentIsNotSelectable = WhenCurrentIsNotSelectable;
 
-            var current = solver.GetNext(FirstSelectable.gameObject);
+            var current = solver.GetNext(FirstSelectable.gameObject, reverse: false);
 
             do
             {
                 ExcpectSelectableSequence.Add(current.GetComponent<Selectable>());
-                current = solver.GetNext(current);
+                current = solver.GetNext(current, reverse: false);
             } while (current != FirstSelectable.gameObject && current != null && !ExcpectSelectableSequence.Contains(current.GetComponent<Selectable>()));
             
             EditorUtility.SetDirty(this);

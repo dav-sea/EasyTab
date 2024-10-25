@@ -12,7 +12,13 @@ namespace EasyTab
     public sealed partial class EasyTabIntegration
     {
         public readonly EasyTabSolver Solver = new EasyTabSolver();
+        private readonly EasyTabInput _easyTabInput = new EasyTabInput();
 
+        public float SecondsForStartFastNavigation = 0.5f;
+        public float SecondsBetweenSelectablesInFastNavigation = 0.1f;
+
+        private float _nextNavigationTime;
+        
         public void UpdateAll()
         {
             UpdateInput();
@@ -21,21 +27,30 @@ namespace EasyTab
 
         public void UpdateInput()
         {
-            bool tabPressed, shiftPressed, enterPressed;
+            _easyTabInput.GetInput(out float tabPressTime, out var isShiftPressed, out var isEnterPressed);
 
-#if ENABLE_INPUT_SYSTEM
-            tabPressed = Keyboard.current.tabKey.wasPressedThisFrame;
-            shiftPressed = Keyboard.current.shiftKey.isPressed;
-            enterPressed = Keyboard.current.enterKey.wasPressedThisFrame ||
-                           Keyboard.current.numpadEnterKey.wasPressedThisFrame;
-#else
-            tabPressed = Input.GetKeyDown(KeyCode.Tab);
-            shiftPressed = Input.GetKey(KeyCode.LeftShift);
-            enterPressed = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter);
-#endif
+            bool needNavigate = false;
+
+            if (tabPressTime != 0)
+            {
+                if (_nextNavigationTime == 0)
+                {
+                    needNavigate = true;
+                    _nextNavigationTime = Time.unscaledTime + SecondsForStartFastNavigation;
+                }
+                else if (_nextNavigationTime - Time.unscaledTime <= 0)
+                {
+                    needNavigate = true;
+                    _nextNavigationTime = Time.unscaledTime + SecondsBetweenSelectablesInFastNavigation;
+                }
+            }
+            else
+            {
+                _nextNavigationTime = 0;
+            }
             
-            if (tabPressed || enterPressed)
-                Navigate(reverse: shiftPressed, isEnter: enterPressed);
+            if (needNavigate || isEnterPressed)
+                Navigate(reverse: isShiftPressed, isEnter: isEnterPressed);
         }
 
         public void UpdateLastSelected()

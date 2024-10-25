@@ -4,11 +4,10 @@
   </a>
 </p>
 
-A simple package that allows you to easily implement <kbd>Tab</kbd> key navigation functionality between Selectables. This package is very easy to install and also easy to customize if needed
-
+A simple package that allows you to easily implement <kbd>Tab</kbd> key navigation functionality between Selectables. This package is very easy to install and does not require any configuration to work, just add it to the project
 
 ![Badge](https://img.shields.io/badge/Unity%202019+-black?logo=unity)
-[![Badge](https://img.shields.io/badge/Just%20install%20to%20use%20-%20orange)](#installation-methods)
+[![Badge](https://img.shields.io/badge/ZeroConfiguration_-white)](#installation-methods)
 [![Badge](https://img.shields.io/badge/Asset%20Store-black?logo=unity)](https://assetstore.unity.com/packages/tools/gui/easytab-286071)
 [![openupm](https://img.shields.io/npm/v/com.dav-sea.easy-tab?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.dav-sea.easy-tab/)
 ![Badge](https://img.shields.io/badge/TMP-supported-green)   
@@ -40,8 +39,6 @@ By default, the package is automatically embedded in PlayerLoop Unity. It is eno
 <details>
 <summary> <b style="font-size: large">Method 2.</b> Via Git URL</summary>
 
-> [!WARNING]
->
 > This installation method requires support for query parameters in the url to specify the path to the package.
 >
 > Requires a unity version of at least **2019.3.4** (If you are using a later version of unity, just use a different installation method)
@@ -92,11 +89,13 @@ Everything is ready! If the installation of the package was successful, then now
 
 ✅ Support for all components based on `Selectable`
 
-🚀 Performing useful functionality immediately after installation
+🚀 **Zero configuration**. Performing useful functionality immediately after installation
 
 🔄 Automatic detection of the navigation sequence by traversing the `Transform` tree
 
-➡️ Support for sequential navigation of the `Selectable` when pressing <kbd>Tab</kbd> key,
+➡️ Support for sequential navigation of the `Selectable` when pressing <kbd>Tab</kbd> key
+
+⏩ Fast navigation by <kbd>Tab</kbd> key holding
 
 🔙 As well as navigation in reverse order when using the <kbd>Shift</kbd>+<kbd>Tab</kbd> key combination
 
@@ -115,6 +114,10 @@ Everything is ready! If the installation of the package was successful, then now
 💫 Automatic navigation between multiple canvases and multiple scenes
 
 ⌨️ Support for all input modes (InputSystem V1 (old), InputSystem V2 (new), Both mode)
+
+🍃 No allocations during navigation operation
+
+🤏 Minimal and simple code base 
 
 ---
 ### With `EasyTab` component 
@@ -138,9 +141,11 @@ Everything is ready! If the installation of the package was successful, then now
 
 ⚙️ The ability to customize global behavior using `EasyTabIntegration.Globally`
 
+🌱️ The ability to create local instances of `EasyTabIntegration` and `EasyTabSolver`
+
 🕹️ The ability to independently control navigation through the code
 
-✨ The ability to define additional conditions for the availability of objects (by defining your own `TransformDriver`)
+✨ The ability to define additional blocking conditions for the availability of objects [(by decorate default Driver)]((#integration-with-your-tools))
 
 # Configuration
 The package provides several configuration levels: `EasyTab` (component), `EasyTabIntegration`, `EasyTabSolver`
@@ -200,7 +205,9 @@ For ease of integration, one instance of class `EasyTabIntegration` is located i
 
 If this does not suit you, you can disable the processing of the global object from `PlayerLoop` via `EasyTabIntegration.GloballyEnabled = false`
 
-You can call the update logic yourself at the time you need via `EasyTabIntegration.Globally.updateAll()`. 
+You can call the update logic yourself at the time you need via `EasyTabIntegration.Globally.UpdateAll()`. 
+
+You can change the time to start fast navigation through the `SecondsForStartFastNavigation` field as well as the speed of fast navigation through the `SecondsBetweenSelectablesInFastNavigation` field
 
 Or you can make your own instance of `EasyTabIntegration` and work with it, ignoring `EasyTabIntegration.Globally`
 
@@ -226,29 +233,45 @@ You can set `NavigationPolicy` in different cases: `WhenCurrentIsNotSet`, `WhenC
 `AllowNavigateToLastSelected`: Allow navigation to the last selected object (especially useful when focus is lost when clicking into the void) as a fallback option
 
 # Integration with your tools
-The idea of EasyTab is that it works out of the box and does not require any configuration. However, if you use third-party tools, for example, to hide UI elements and windows, you need to define a small bridge between this intranet and EasyTab for correct works
+The idea of EasyTab is that it works "out of the box" and does not require any configuration. However, if you use third-party tools and unusual approaches to hide user interface elements and windows, then navigation may not work as expected.
 
-A common practice when developing UI in Unity is to hide elements by changing transparency, moving outside the screen space, reducing scale, etc.
+EasyTab needs to understand which objects are really active and which are hidden. To do this, EasyTab offers a simple **API based on decorators**.
 
-As a rule, there is always some bool property that determines whether the object is visible or not.
-In this case, you need to add a simple condition so that EasyTab can take this into account
+In simple cases, you just need to describe in which cases the element is not Selectable, for example:
 
-For example, like this:
+```csharp
+var solver = EasyTabIntergation.Globally.Solver;
 
-```c#
-var globalDrivers = EasyTabIntegration.Globally.Solver.Drivers;
-var conditions = globalDrivers.Conditions.ConditionsForTraversingChildren;
-
-// It is necessary to define a condition in case of non-met of which the children of this transform will not be traversed.
-conditions.Add(t => !t.TryGetComponent<Window>(out var window) || window.IsActive);
+// we decorate the default driver with a handler that defines elements with a Graphic component and a transparent color as not selectable 
+solver.Driver = solver.Driver
+    .WithSelectableBlocking(t => t.TryGetComponent<Graphic>(out var graphic) && graphic.color.a <= 0);
 ```
 
-It can also be useful to exclude specific elements, for this you should use `ConditionsForSelectable` instead of `ConditionsForTraversingChildren`
+A common practice when developing a user interface in Unity is to hide elements by changing transparency, moving outside the screen space, zooming out, etc.
+
+However, EasyTab does not know about your specific implementation of hiding windows/popups, so you can use the API too, but to exclude the hierarchy of objects from navigation, for example:
+```c#
+var solver = EasyTabIntergation.Globally.Solver;
+
+// we decorate the default driver with a handler that excludes from navigation all children of elements that have a disabled window.
+solver.Driver = solver.Driver
+    .WithTraversingChildrenBlocking(t => t.TryGetComponent(out Window window) && !window.IsActive);
+```
+---
+You can decorate any IEasyTabDriver method.
+
+For example, you can decorate `GetBorderMode` and change the BorderMode for all windows through the decorator, so as not to override the BorderMode through the EasyTab component
 
 ```c#
-var globalDrivers = EasyTabIntegration.Globally.Solver.Drivers;
-var conditions = globalDrivers.Conditions.ConditionsForSelectable;
+var solver = EasyTabIntergation.Globally.Solver;
 
-// We exclude transparent elements
-conditions.Add(t => !t.TryGetComponent<Graphic>(out var graphic) || graphic.color.a > 0);
+solver.Driver = solver.Driver.DecorateBorderMode((@base, target) =>
+{
+    // We want to navigate all the elements inside the window cyclically
+    if (target.IsTransform(out var targetTransform) && targetTransform.TryGetComponent<Window>(out _))
+        return BorderMode.Roll;
+
+    // If the target is not a window, then use the base decorator
+    return @base.GetBorderMode(target);
+});
 ```

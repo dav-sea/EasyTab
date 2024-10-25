@@ -2,9 +2,9 @@
 
 namespace EasyTab
 {
-    internal sealed class EasyTabNodeSolver
+    internal sealed class EasyTabHierarchySolver
     {
-        public EasyTabNode FindNextTab(EasyTabNode current, bool reverse)
+        public EasyTabNode FindNext(EasyTabNode current, bool reverse)
         {
             if (!reverse)
                 if (TryFindFirstTabInChildren(current, out var nextInCurrent, false))
