@@ -47,7 +47,7 @@ By default, the package is automatically embedded in PlayerLoop Unity. It is eno
 2. Click `+` button
 3. Paste url 
     ```
-    https://github.com/dav-sea/EasyTab.git?path=Assets/Package
+    https://github.com/dav-sea/EasyTab.git?path=Assets/EasyTab
     ```
 4. Click `Add` button
 
