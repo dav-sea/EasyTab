@@ -12,13 +12,25 @@ namespace EasyTab
 
         public void GetInput(out float tabPressedTime, out bool isShiftPressed, out bool isEnterPressed)
         {
+            bool tabPressed;
+            
 #if ENABLE_INPUT_SYSTEM
-            var tabPressed = Keyboard.current.tabKey.isPressed;
-            isShiftPressed = Keyboard.current.shiftKey.isPressed;
-            isEnterPressed = Keyboard.current.enterKey.wasPressedThisFrame ||
-                           Keyboard.current.numpadEnterKey.wasPressedThisFrame;
+            var keyboard = Keyboard.current;
+            if (keyboard != null)
+            {
+                tabPressed = keyboard.tabKey.isPressed;
+                isShiftPressed = keyboard.shiftKey.isPressed;
+                isEnterPressed = keyboard.enterKey.wasPressedThisFrame ||
+                                 keyboard.numpadEnterKey.wasPressedThisFrame;
+            }
+            else // if not keyboard. like PS5. https://github.com/dav-sea/EasyTab/issues/7
+            {
+                tabPressed = false;
+                isShiftPressed = false;
+                isEnterPressed = false;
+            }
 #else
-            var tabPressed = Input.GetKey(KeyCode.Tab);
+            tabPressed = Input.GetKey(KeyCode.Tab);
             isShiftPressed = Input.GetKey(KeyCode.LeftShift);
             isEnterPressed = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter);
 #endif
