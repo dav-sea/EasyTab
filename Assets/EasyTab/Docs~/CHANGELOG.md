@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2024-11-16
+### 👨‍🔧 Fixed
+- Exception when keyboard is not connected (#7, #8)
+
 ## [1.3.0] - 2024-10-26
 ### 🚨 Breaking changes in API
 - Removed conditions from **EasyTabDriver**. Now you can use API based on decoration of `IEasyTabDriver`.
