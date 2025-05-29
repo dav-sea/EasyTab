@@ -1,7 +1,8 @@
 ﻿<p align="center">
   <a href="https://github.com/dav-sea/EasyTab/" target="_blank">
-    <img alt="EasyTab" src="https://media.githubusercontent.com/media/dav-sea/EasyTab/master/Media/banner.png" width="1000">
+    <img alt="EasyTab" src="https://github.com/user-attachments/assets/35f195b9-321f-401f-bc96-eb9171ec9fc5" width="1000">
   </a>
+
 </p>
 
 A simple package that allows you to easily implement <kbd>Tab</kbd> key navigation functionality between Selectables. This package is very easy to install and does not require any configuration to work, just add it to the project
