@@ -15,9 +15,17 @@ namespace EasyTab
         // The initial capacity is 0, so GetRootGameObjects will set the best capacity before filling
         private readonly List<GameObject> _listOfGameObjects = new List<GameObject>(0);
 
+        private Scene _previousGetChildScene;
+
         public EasyTabDriver([NotNull] IEasyTabDriverProvider driverProvider)
         {
             _driverProvider = driverProvider ?? throw new ArgumentNullException(nameof(driverProvider));
+        }
+
+        public void ClearCache()
+        {
+            _listOfGameObjects.Clear();
+            _previousGetChildScene = default;
         }
 
         public EasyTabNode GetParent(Target target)
@@ -29,8 +37,8 @@ namespace EasyTab
                     var transformParent = transform.parent;
 
                     Target parentTarget = transformParent
-                        ? (Target) transformParent
-                        : (Target) transform.gameObject.scene;
+                        ? (Target)transformParent
+                        : (Target)transform.gameObject.scene;
 
                     return _driverProvider.CreateNode(parentTarget);
 
@@ -44,6 +52,22 @@ namespace EasyTab
                     return Fail_InvalidOperationForTargetType<EasyTabNode>(target.TargetType);
             }
         }
+        
+        private GameObject GetRootGameObject(Scene scene, int childNumber)
+        {
+            // Caching children in `_listOfGameObjects` allows you to get rid of o(n^2) complexity
+            // when calling getChild for a scene target. Allows you not to copy N times N number of objects. 
+            // This is most important when there is a large number of objects at the root of the scene (> 1000)
+            if (_previousGetChildScene != scene)
+            {
+                // Method overloading with List<> is used to avoid allocations
+                scene.GetRootGameObjects(_listOfGameObjects);
+                _previousGetChildScene = scene;
+            }
+
+            return _listOfGameObjects[childNumber];
+        }
+
 
         public EasyTabNode GetChild(Target target, int childNumber)
         {
@@ -58,15 +82,8 @@ namespace EasyTab
                     return _driverProvider.CreateNode(childTransform);
 
                 case TargetType.Scene:
-                    // Method overloading with List<> is used to avoid allocations
-                    target.AsScene.GetRootGameObjects(_listOfGameObjects);
-
-                    var childGameObject = _listOfGameObjects[childNumber];
-
-                    // It is necessary to clean the list so as not to store links and not to disrupt the GC
-                    _listOfGameObjects.Clear();
-
-                    return _driverProvider.CreateNode(childGameObject.transform);
+                    var rootGameObject = GetRootGameObject(target.AsScene, childNumber);
+                    return _driverProvider.CreateNode(rootGameObject.transform);
 
                 default:
                     return Fail_InvalidOperationForTargetType<EasyTabNode>(target.TargetType);
