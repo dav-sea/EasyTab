@@ -41,7 +41,7 @@ namespace EasyTab.Tests
                 easyTabSupport.UpdateLastSelected();
                 EventSystem.current.SetSelectedGameObject(seq.First().gameObject);
             }
-
+            
             foreach (var selectable in seq)
             {
                 var current = EventSystem.current.currentSelectedGameObject;
@@ -49,6 +49,17 @@ namespace EasyTab.Tests
                 easyTabSupport.Navigate(reverse);
                 await UniTask.Delay(TimeSpan.FromSeconds(DelayInSecondsBetweenTabs));
             }
+            
+            LogAssert.NoUnexpectedReceived();
+        });
+
+        [UnityTest]
+        public IEnumerator CyclicTestCase() => Lifetime.DefineAsync(async (lifetime) =>
+        {
+            LogAssert.Expect(LogType.Error,"Cyclic link detected in jumps");
+            LogAssert.Expect(LogType.Error,"Cyclic link detected in jumps");
+            LogAssert.Expect(LogType.Error,"Cyclic link detected in jumps");
+            await TestCase("UseJumpsOrTheirNextTestCase5", false).ToUniTask();
         });
 
 
@@ -116,7 +127,6 @@ namespace EasyTab.Tests
                 yield return new TestCaseData("UseJumpsOrTheirNextTestCase2", false).Returns(null);
                 yield return new TestCaseData("UseJumpsOrTheirNextTestCase3", false).Returns(null);
                 yield return new TestCaseData("UseJumpsOrTheirNextTestCase4", false).Returns(null);
-                yield return new TestCaseData("UseJumpsOrTheirNextTestCase5", false).Returns(null);
                 yield return new TestCaseData("NavigationLockOnMultilineTMPInputFieldCase1", false).Returns(null);
                 yield return new TestCaseData("NavigationForceUnlockOnMultilineTMPInputFieldCase1", true).Returns(null);
                 yield return new TestCaseData("NavigationForceUnlockOnMultilineTMPInputFieldCase1", false).Returns(null);

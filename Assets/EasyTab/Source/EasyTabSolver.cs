@@ -26,11 +26,16 @@ namespace EasyTab
         /// </summary>
         private readonly HashSet<GameObject> _visitedGameObjects = new HashSet<GameObject>();
         private readonly EasyTabHierarchySolver _hierarchySolver = new EasyTabHierarchySolver();
+
+        private readonly EasyTabDriver _rootDriver;
         private IEasyTabDriver _driver;
         
         
-        public EasyTabSolver() => _driver = new EasyTabDriver(this);
-        
+        public EasyTabSolver()
+        {
+            _driver = _rootDriver = new EasyTabDriver(this);
+        }
+
         [NotNull]
         public IEasyTabDriver Driver
         {
@@ -47,6 +52,7 @@ namespace EasyTab
             }
             finally // ..but if a real StackOverflowException is thrown, the application will crash
             {
+                _rootDriver.ClearCache();
                 _visitedGameObjects.Clear();
             }
         }
@@ -61,6 +67,7 @@ namespace EasyTab
             }
             finally // ..but if a real StackOverflowException is thrown, the application will crash
             {
+                _rootDriver.ClearCache();
                 _visitedGameObjects.Clear();
             }
         }
@@ -167,9 +174,9 @@ namespace EasyTab
                 return EasyTabNode.None;
             }
 
-            var next2 = GetNextWithoutPolicyImpl(currentNode, reverse);
-            if (next2.Target.IsTransform)
-                return next2;
+            var next = GetNextWithoutPolicyImpl(currentNode, reverse);
+            if (next.Target.IsTransform)
+                return next;
 
             // is jumping continuation in same case...
             if (currentNode.IsSelectable)
