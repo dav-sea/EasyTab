@@ -1,7 +1,8 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using EasyTab.Internals;
 
 [assembly: InternalsVisibleTo("EasyTab.Tests.Runtime")]
 
 [assembly: AssemblyTitle( "EasyTab" )]
-[assembly: AssemblyVersion( "1.3.1" )]
+[assembly: AssemblyVersion(Utils.PackageVersion)]
