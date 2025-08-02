@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-08-03
+### 🚀 Improved
+- Improved performance in scenes with a large number of root objects (#9)
+- Add icon for `EasyTab` component
+
+### 👨‍🔧 Fixed
+- Fixed erroneous `Roll` navigation in a situation where the parent has the `Clamp` mode selected. (#10)
+
 ## [1.3.1] - 2024-11-16
 ### 👨‍🔧 Fixed
 - Exception when keyboard is not connected (#7, #8)
