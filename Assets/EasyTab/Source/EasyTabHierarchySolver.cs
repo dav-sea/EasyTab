@@ -55,9 +55,7 @@ namespace EasyTab
                 if (reverse && parent.IsSelectable)
                     return parent;
 
-                var candidate = FindNextInNeighborsAndParents(parent, reverse);
-                if (!candidate.IsNone)
-                    return candidate;
+                return FindNextInNeighborsAndParents(parent, reverse);
             }
 
             if (TryFindFirstTabInChildren(current, out var nextTabInChildren, reverse))

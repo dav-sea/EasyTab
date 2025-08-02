@@ -130,6 +130,8 @@ namespace EasyTab.Tests
                 yield return new TestCaseData("NavigationLockOnMultilineTMPInputFieldCase1", false).Returns(null);
                 yield return new TestCaseData("NavigationForceUnlockOnMultilineTMPInputFieldCase1", true).Returns(null);
                 yield return new TestCaseData("NavigationForceUnlockOnMultilineTMPInputFieldCase1", false).Returns(null);
+                yield return new TestCaseData("CanvasWithClampAndCloseButton", false).Returns(null);
+                yield return new TestCaseData("CanvasWithClampAndCloseButtonReverse", true).Returns(null);
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿<p align="center">
   <a href="https://github.com/dav-sea/EasyTab/" target="_blank">
-    <img alt="EasyTab" src="https://github.com/user-attachments/assets/35f195b9-321f-401f-bc96-eb9171ec9fc5" width="1000">
+    <img alt="EasyTab" src="https://link.davsea.com/easy-tab/readme-banner" width="1000">
   </a>
 
 </p>
@@ -9,13 +9,12 @@ A simple package that allows you to easily implement <kbd>Tab</kbd> key navigati
 
 ![Badge](https://img.shields.io/badge/Unity%202019+-black?logo=unity)
 [![Badge](https://img.shields.io/badge/ZeroConfiguration_-white)](#installation-methods)
-[![Badge](https://img.shields.io/badge/Asset%20Store-black?logo=unity)](https://assetstore.unity.com/packages/tools/gui/easytab-286071)
 [![openupm](https://img.shields.io/npm/v/com.dav-sea.easy-tab?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.dav-sea.easy-tab/)
 ![Badge](https://img.shields.io/badge/TMP-supported-green)   
 ![Badge](https://img.shields.io/badge/InputSystem%20V1%20(Old)-supported-green)
 ![Badge](https://img.shields.io/badge/InputSystem%20V2%20(New)-supported-green)
-[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/dav-sea/EasyTab/total?label=downloads&logo=github)](https://github.com/dav-sea/EasyTab/releases/latest)
-
+[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/dav-sea/EasyTab/total?label=ReleasePage&logo=github&style=social)](https://github.com/dav-sea/EasyTab/releases/latest)
+[![Badge](https://link.davsea.com/easy-tab/readme/assetStoreBage)](https://assetstore.unity.com/packages/tools/gui/easytab-286071)
 ---
 
 # Table of Contents
